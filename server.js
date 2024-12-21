@@ -19,6 +19,10 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET // Store in .env file
 });
 
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
 // Route to create a Razorpay payment order
 app.post("/create-order", async (req, res) => {
   const { amount
