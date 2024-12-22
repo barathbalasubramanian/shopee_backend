@@ -1,3 +1,4 @@
+const axios = require('axios');
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -9,7 +10,11 @@ const app = express();
 const port = 8000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: true, 
+  credentials: true
+}));
+app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -19,8 +24,65 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET // Store in .env file
 });
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+// const sendPickupRequest = async (orderData) => {
+//   const config = {
+//     method: 'post',
+//     maxBodyLength: Infinity,
+//     url: 'https://erpstcourier.com/ecom/v2/pickup.php',
+//     headers: {
+//       'API-TOKEN': '3rmKwMWI8nCjHJTzzxEQrwmTTVZ6IYLY',
+//       'Content-Type': 'application/json',
+//       'Cookie': 'PHPSESSID=6uf0363pmjp6jou187gn0e6oa4'
+//     },
+//     data: JSON.stringify(orderData)
+//   };
+
+//   try {
+//     const response = await axios.request(config);
+//     console.log('Pickup request successful:', response.data);
+//     return response.data; 
+//   } catch (error) {
+//     console.error('Error sending pickup request:', error.message);
+//     throw error;
+//   }
+// };
+
+
+app.get("/", async (req, res) => {
+  res.send("Welcome to the Razorpay API server");
+  // try {
+  //   const data = await sendPickupRequest(orderData);
+  //   console.log("Response:", data);
+  //   res.status(200).json({ success: true, data });
+  // } catch (error) {
+  //   console.error("Error:", error.message);
+  //   res.status(500).json({ success: false, message: error.message });
+  // }
+});
+
+app.post("/pickup", async (req, res) => {
+  const orderData = req.body;
+
+  const config = {
+    method: "post",
+    maxBodyLength: Infinity,
+    url: "https://erpstcourier.com/ecom/v2/pickup.php",
+    headers: {
+      "API-TOKEN": "3rmKwMWI8nCjHJTzzxEQrwmTTVZ6IYLY",
+      "Content-Type": "application/json",
+      'Cookie': 'PHPSESSID=6uf0363pmjp6jou187gn0e6oa4'
+    },
+    data: JSON.stringify(orderData),
+  };
+
+  try {
+    const response = await axios.request(config);
+    console.log(response.data);
+    res.status(200).json(response.data);
+  } catch (error) {
+    console.error("Error sending pickup request:", error.message);
+    res.status(500).json({ message: "Failed to send pickup request" });
+  }
 });
 
 // Route to create a Razorpay payment order
